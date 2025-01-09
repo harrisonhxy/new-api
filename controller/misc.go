@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func TestStatus(c *gin.Context) {
@@ -171,9 +172,30 @@ func SendEmailVerification(c *gin.Context) {
 	code := common.GenerateVerificationCode(6)
 	common.RegisterVerificationCodeWithKey(email, code, common.EmailVerificationPurpose)
 	subject := fmt.Sprintf("%s邮箱验证邮件", common.SystemName)
-	content := fmt.Sprintf("<p>您好，你正在进行%s邮箱验证。</p>"+
-		"<p>您的验证码为: <strong>%s</strong></p>"+
-		"<p>验证码 %d 分钟内有效，如果不是本人操作，请忽略。</p>", common.SystemName, code, common.VerificationValidMinutes)
+	// content := fmt.Sprintf("<p>您好，你正在进行%s邮箱验证。</p>"+
+	// 	"<p>您的验证码为: <strong>%s</strong></p>"+
+	// 	"<p>验证码 %d 分钟内有效，如果不是本人操作，请忽略。</p>", common.SystemName, code, common.VerificationValidMinutes)
+	content := fmt.Sprintf(`<div style="font-family:arial,helvetica,sans-serif;">
+    <p style="color: #333; font-size: 16px; margin-bottom: 20px;">您好，你正在进行%s邮箱验证。</p>
+    <p style="margin-bottom: 20px;">您的验证码为: 
+        <strong style="color: #2196F3; font-size: 24px; padding: 5px 10px; background-color: #E3F2FD; border-radius: 4px;">%s</strong>
+    </p>
+    <p style="color: #666; margin-bottom: 30px;">验证码 %d 分钟内有效，如果不是本人操作，请忽略。</p>
+    
+    <table style='font-family:arial,helvetica,sans-serif; margin-top: 40px;' role='presentation' cellpadding='0' cellspacing='0' width='100%%' border='0'>
+        <tbody>
+            <tr>
+                <td style='overflow-wrap:break-word;word-break:break-word;padding:0px 10px 10px;font-family:arial,helvetica,sans-serif;' align='left'>
+                    <div style='font-size: 12px; line-height: 140%%; text-align: right; word-wrap: break-word;'>
+                        <div>
+                            <div style="color: #999;"><sub>© %d %s. All rights reserved.</sub></div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>`, common.SystemName, code, common.VerificationValidMinutes, time.Now().Year(), common.SystemName)
 	err := common.SendEmail(subject, email, content)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -209,10 +231,35 @@ func SendPasswordResetEmail(c *gin.Context) {
 	common.RegisterVerificationCodeWithKey(email, code, common.PasswordResetPurpose)
 	link := fmt.Sprintf("%s/user/reset?email=%s&token=%s", setting.ServerAddress, email, code)
 	subject := fmt.Sprintf("%s密码重置", common.SystemName)
-	content := fmt.Sprintf("<p>您好，你正在进行%s密码重置。</p>"+
-		"<p>点击 <a href='%s'>此处</a> 进行密码重置。</p>"+
-		"<p>如果链接无法点击，请尝试点击下面的链接或将其复制到浏览器中打开：<br> %s </p>"+
-		"<p>重置链接 %d 分钟内有效，如果不是本人操作，请忽略。</p>", common.SystemName, link, link, common.VerificationValidMinutes)
+	// content := fmt.Sprintf("<p>您好，你正在进行%s密码重置。</p>"+
+	// 	"<p>点击 <a href='%s'>此处</a> 进行密码重置。</p>"+
+	// 	"<p>如果链接无法点击，请尝试点击下面的链接或将其复制到浏览器中打开：<br> %s </p>"+
+	// 	"<p>重置链接 %d 分钟内有效，如果不是本人操作，请忽略。</p>", common.SystemName, link, link, common.VerificationValidMinutes)
+	content := fmt.Sprintf(`<div style="font-family:arial,helvetica,sans-serif;">
+    <p style="color: #333; font-size: 16px; margin-bottom: 20px;">您好，你正在进行%s密码重置。</p>
+    <p style="margin-bottom: 20px;">请点击
+        <a href='%s' style="color: #2196F3; text-decoration: none; font-weight: bold;">此处</a>
+        进行密码重置。
+    </p>
+    <p style="color: #666; margin-bottom: 20px;">如果链接无法点击，请尝试点击下面的链接或将其复制到浏览器中打开：<br>
+        <span style="color: #2196F3; background-color: #E3F2FD; padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 8px; word-break: break-all;">%s</span>
+    </p>
+    <p style="color: #666; margin-bottom: 30px;">重置链接 %d 分钟内有效，如果不是本人操作，请忽略。</p>
+    
+    <table style='font-family:arial,helvetica,sans-serif; margin-top: 40px;' role='presentation' cellpadding='0' cellspacing='0' width='100%%' border='0'>
+        <tbody>
+            <tr>
+                <td style='overflow-wrap:break-word;word-break:break-word;padding:0px 10px 10px;font-family:arial,helvetica,sans-serif;' align='left'>
+                    <div style='font-size: 12px; line-height: 140%%; text-align: right; word-wrap: break-word;'>
+                        <div>
+                            <div style="color: #999;"><sub>© %d %s. All rights reserved.</sub></div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>`, common.SystemName, link, link, common.VerificationValidMinutes, time.Now().Year(), common.SystemName)
 	err := common.SendEmail(subject, email, content)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
